@@ -11,6 +11,7 @@ Creating Bouncing Canvas Mask
 
 - Make sure to add width and height on <canvas>
 - Please image URL in `data-src`
+- [DEMO](https://stoneshower.github.io/bouncingmask/ "DEMO")
 
 ### Prerequisites
 
