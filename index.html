@@ -9,43 +9,71 @@
 
         <link rel="manifest" href="site.webmanifest">
         <link rel="apple-touch-icon" href="icon.png">
+
+        <style>
+          .canvas{
+            cursor: pointer;
+          }
+          .canvas:hover{
+            opacity: .4;
+          }
+          @media screen and (max-width:600px) {
+            .canvas{
+              width: 100px;
+              height: 100px;
+            }
+          }
+        </style>
     </head>
     <body>
 
         <canvas class="canvas" width="200" height="200"
-                 data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg">
+                data-intensity="0.2"
+                data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg"
+                data-url="http://yahoo.co.jp">
         </canvas>
+
         <canvas class="canvas" width="100" height="100"
-                 data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg">
+                data-intensity="0.2"
+                 data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg"
+                 data-url="http://google.co.jp">
         </canvas>
         <canvas class="canvas" width="50" height="50"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/com/img/thumb/200309/message/flash/201709/20170921_asuraku_314x314.gif">
         </canvas>
         <canvas  class="canvas" width="200" height="200"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/evt/event/rmagazine/_cmn/img/main/2017/top_0920_researchvol12.jpg">
         </canvas>
         <canvas class="canvas" width="100" height="100"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg">
         </canvas>
         <canvas class="canvas" width="50" height="50"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg">
         </canvas>
         <canvas  class="canvas" width="200" height="200"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/com/img/thumb/200309/message/flash/201709/20170921_asuraku_314x314.gif">
         </canvas>
         <canvas class="canvas" width="100" height="100"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/evt/event/rmagazine/_cmn/img/main/2017/top_0920_researchvol12.jpg">
         </canvas>
         <canvas class="canvas" width="50" height="50"
+                data-intensity="0.2"
                  data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg">
         </canvas>
 
 
         <script>
-        var MAX = 10;
+        var MAX = 20; // Number of Edges
         var CENTER_POS = {x:100, y:100};
-        var RADIUS = 100;
-        var FPS = 20;
+        var RADIUS = 50;
+        var FPS = 60; // only for < IE9
+        var BOUNCINGSPEED = 5;
 
         var Point = function(centerPos, radius, degree, range, targetEl){
           this.pointX = undefined;
@@ -60,7 +88,6 @@
           this.degree = degree;
           this.range = range;
           this.target = targetEl;
-          // console.log(range)
           this.getElements();
           this.setPoints();
         }
@@ -70,10 +97,12 @@
             this.radian = this.degree * (Math.PI / 180);
             this.centerX = this.target.getAttribute('width') * 0.5;
             this.centerY = this.target.getAttribute('height') * 0.5;
-            this.speed = Math.random() * 10 + 5 ;
-            this.movement = Math.random()  ;
+            this.speed = Math.random() * 10 + BOUNCINGSPEED ;
+            // this.movement = Math.random() + 5 ;
             this.rotation = 0;
             this.addPos = 0;
+            console.log(this.target.offsetWidth);
+            console.log(this.target.offsetHeight);
           },
           setPoints: function(){
             this.addPos = Math.cos(this.rotation * ( Math.PI / 180) ) * this.range;
@@ -90,32 +119,40 @@
           this.elOrder = elOrder;
           this.getElements();
           this.init();
+          this.events();
         }
 
         AnimatePoints.prototype = {
           getElements: function(){
             this.ctx = this.el.getContext('2d');
-            this.ctxDiameter = this.el.width * 0.4;
+            this.ctxDiameter = this.el.width;
+            this.ctxRadius = this.ctxDiameter * 0.5;
+            this.intensity = this.el.getAttribute('data-intensity') || 0.3;
             this.src = this.el.getAttribute('data-src');
+            this.link = this.el.getAttribute('data-url');
             this.image = new Image();
             this.image.src = this.src;
             this.point = [];
             this.rota = 360 / MAX;
+            this.isAnimate = true;
+            this.loop = undefined;
           },
           init: function(){
             var that = this;
-            var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
-                window.setTimeout(callback, 1000 / FPS);
-            };
+            var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) { window.setTimeout(callback, 1000 / FPS) };
 
             for(var i = 0; i < MAX; i++){
-              this.point[i] = new Point(CENTER_POS, this.ctxDiameter, this.rota * i, Math.random(), this.el);
+              this.point[i] = new Point(CENTER_POS, this.ctxRadius, this.rota * i, this.intensity, this.el);
             }
-            var loop = function(){
-              that.update();
-              requestAnimationFrame(loop);
-            }
-            loop();
+
+            that.loop = function(){
+                if(that.isAnimate){
+                  that.update();
+                  requestAnimationFrame(that.loop);
+                }
+              }
+            that.loop();
+            
           },
           update: function() {
             var that = this;
@@ -131,7 +168,7 @@
             that.ctx.clearRect(0, 0, that.el.width, that.el.height);
 
             //Load a masking image
-            that.ctx.drawImage(that.image, 0, 0, RADIUS * 4, RADIUS * 2.5)
+            that.ctx.drawImage(that.image, 0, 0, that.ctxDiameter, that.ctxDiameter)
 
             //Adjust masking
             that.ctx.globalCompositeOperation = 'destination-atop';
@@ -150,6 +187,23 @@
             that.ctx.quadraticCurveTo(that.point[j].pointX, that.point[j].pointY, xcFirst, ycFirst);
             that.ctx.closePath();
             that.ctx.fill('evenodd');
+          },
+          events: function(e){
+            this.el.addEventListener('click', this.pageTransition.bind(this), false);
+            this.el.addEventListener('mouseover', this.pauseBounce.bind(e, this), false);
+            this.el.addEventListener('mouseout', this.resumeBounce.bind(e, this), false);
+          },
+          pageTransition: function(){
+            window.location = this.link;
+          },
+          pauseBounce: function(e){
+            var that = e;
+            that.isAnimate = false;
+          },
+          resumeBounce: function(e){
+            var that = e;
+            that.isAnimate = true;
+            that.loop();
           }
         }
         var targetNode = document.querySelectorAll('canvas')
