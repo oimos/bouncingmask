@@ -15,7 +15,7 @@ Creating Bouncing Canvas Mask
 
 ### Prerequisites
 
-Works with < IE9
+Works with >= IE9
 
 ## License
 
