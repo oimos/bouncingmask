@@ -122,12 +122,15 @@ AnimatePoints.prototype = {
   },
   events: function(e){
     this.el.addEventListener('click', this.pageTransition.bind(this), false);
+    this.el.addEventListener('touchend', this.pageTransition.bind(this), false);
     this.el.addEventListener('mouseover', this.pauseBounce.bind(e, this), false);
     this.el.addEventListener('mouseout', this.resumeBounce.bind(e, this), false);
   },
-  pageTransition: function(){
-    console.log(this)
-    window.location = this.link;
+  pageTransition: function(e){
+    console.log(e.target.hasAttribute('data-url'))
+    if(e.target.hasAttribute('data-url')){
+      window.location = this.link;
+    }
   },
   pauseBounce: function(e){
     var that = e;
