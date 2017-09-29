@@ -126,6 +126,7 @@ AnimatePoints.prototype = {
     this.el.addEventListener('mouseout', this.resumeBounce.bind(e, this), false);
   },
   pageTransition: function(){
+    console.log(this)
     window.location = this.link;
   },
   pauseBounce: function(e){
