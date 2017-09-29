@@ -17,6 +17,9 @@
           .canvas:hover{
             opacity: .4;
           }
+          .canvas[data-random="true"]{
+            border: 1px solid red;
+          }
           @media screen and (max-width:600px) {
             .canvas{
               width: 100px;
@@ -30,7 +33,8 @@
         <canvas class="canvas" width="200" height="200"
                 data-intensity="0.2"
                 data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg"
-                data-url="http://yahoo.co.jp">
+                data-url="http://yahoo.co.jp"
+                data-random="true">
         </canvas>
 
         <canvas class="canvas" width="100" height="100"
@@ -40,15 +44,18 @@
         </canvas>
         <canvas class="canvas" width="50" height="50"
                 data-intensity="0.2"
-                 data-src="https://r.r10s.jp/com/img/thumb/200309/message/flash/201709/20170921_asuraku_314x314.gif">
+                 data-src="https://r.r10s.jp/com/img/thumb/200309/message/flash/201709/20170921_asuraku_314x314.gif"
+                 data-random="true">
         </canvas>
         <canvas  class="canvas" width="200" height="200"
                 data-intensity="0.2"
-                 data-src="https://r.r10s.jp/evt/event/rmagazine/_cmn/img/main/2017/top_0920_researchvol12.jpg">
+                 data-src="https://r.r10s.jp/evt/event/rmagazine/_cmn/img/main/2017/top_0920_researchvol12.jpg"
+                 data-random="true">
         </canvas>
         <canvas class="canvas" width="100" height="100"
                 data-intensity="0.2"
-                 data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg">
+                 data-src="https://r.r10s.jp/com/img/home/smart/topbanner/campaign/201702/sports/2017_vissel_win_pc_314x314.jpg"
+                 data-random="true">
         </canvas>
         <canvas class="canvas" width="50" height="50"
                 data-intensity="0.2"
@@ -98,11 +105,8 @@
             this.centerX = this.target.getAttribute('width') * 0.5;
             this.centerY = this.target.getAttribute('height') * 0.5;
             this.speed = Math.random() * 10 + BOUNCINGSPEED ;
-            // this.movement = Math.random() + 5 ;
             this.rotation = 0;
             this.addPos = 0;
-            console.log(this.target.offsetWidth);
-            console.log(this.target.offsetHeight);
           },
           setPoints: function(){
             this.addPos = Math.cos(this.rotation * ( Math.PI / 180) ) * this.range;
@@ -129,13 +133,19 @@
             this.ctxRadius = this.ctxDiameter * 0.5;
             this.intensity = this.el.getAttribute('data-intensity') || 0.3;
             this.src = this.el.getAttribute('data-src');
+            this.isRandom = this.el.getAttribute('data-random');
             this.link = this.el.getAttribute('data-url');
-            this.image = new Image();
-            this.image.src = this.src;
             this.point = [];
             this.rota = 360 / MAX;
             this.isAnimate = true;
             this.loop = undefined;
+            this.image = new Image();
+            if(this.isRandom == 'true'){
+              this.image.src = imgArray[imgPos];
+              imgPos++;
+            } else {
+              this.image.src = this.src;
+            }
           },
           init: function(){
             var that = this;
@@ -152,7 +162,7 @@
                 }
               }
             that.loop();
-            
+
           },
           update: function() {
             var that = this;
@@ -206,7 +216,27 @@
             that.loop();
           }
         }
-        var targetNode = document.querySelectorAll('canvas')
+
+
+        var targetNode = document.querySelectorAll('canvas');
+        var randomImgEl = document.querySelectorAll('canvas[data-random="true"]');
+        var imgArray = [];
+        var imgPos = 0;
+        randomImgEl.forEach(function(el){
+          imgArray.push(el.getAttribute('data-src'));
+        });
+        function shuffle(a) {
+            var j, x, i;
+            for (i = a.length; i; i--) {
+                j = Math.floor(Math.random() * i);
+                x = a[i - 1];
+                a[i - 1] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+        imgArray = shuffle(imgArray);
+
         for(var i = 0; i < targetNode.length; i++){
           var animatePoints = new AnimatePoints(targetNode[i], i);
         }
